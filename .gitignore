@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Virtual environments
+.dsl/
+
+# Claude Code settings
+.claude/
+
+# Pipeline outputs
+cache/
+results/
