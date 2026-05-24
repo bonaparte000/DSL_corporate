@@ -39,6 +39,7 @@ from pipeline.visualizer import (
     plot_brand_intent_heatmap,
     plot_intent_boxplot,
 )
+from pipeline.embedding_analyzer import run_embedding_analysis
 
 
 # ── 입력 로더 ──────────────────────────────────────────────────────────────────
@@ -239,6 +240,20 @@ async def run(args: argparse.Namespace) -> None:
     plot_brand_intent_heatmap(bi_df, plots_dir)
     plot_brand_gain(bi_df, plots_dir)
 
+    # ── [6/6] 임베딩 & Latent Space 분석 (선택) ───────────────────────────────
+    if args.embed:
+        embed_api_key = args.api_key or config.OPENAI_API_KEY
+        if not embed_api_key:
+            print('\n[6/6] 임베딩 생략 — OpenAI API 키 없음 (--api-key 필요)')
+        else:
+            embed_client = AsyncOpenAI(api_key=embed_api_key)
+            await run_embedding_analysis(
+                df, q_df, plots_dir, results_dir,
+                client=embed_client,
+                target=args.target,
+                model=args.embed_model,
+            )
+
     print(f'\n✓ 완료  →  {results_dir.resolve()}')
 
 
@@ -276,6 +291,14 @@ def main() -> None:
     parser.add_argument('--min-brand-count', type=int, default=3)
     parser.add_argument('--call-delay',      type=float, default=1.5)
     parser.add_argument('--no-cache',        action='store_true')
+
+    # 임베딩 옵션
+    parser.add_argument('--embed',       action='store_true',
+                        help='임베딩 & Latent Space 분석 실행 (OpenAI 키 필요)')
+    parser.add_argument('--target',      default='',
+                        help='[embed] 분석 타겟 브랜드명 (예: 아이리움안과)')
+    parser.add_argument('--embed-model', default='text-embedding-3-small',
+                        help='[embed] 임베딩 모델 (기본: text-embedding-3-small)')
 
     args = parser.parse_args()
     asyncio.run(run(args))
