@@ -1,105 +1,64 @@
+import { useState, useEffect } from 'react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   PieChart, Pie, Cell, Tooltip, Legend,
-  ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, LabelList,
   ResponsiveContainer,
 } from 'recharts'
 import {
-  AlertTriangle, Target, Zap, AlertCircle,
-  Lightbulb, Brain, Award, Info, ArrowUpRight, BarChart2,
+  AlertTriangle, Target, Info, BarChart2, Sparkles, ArrowRight, Globe,
 } from 'lucide-react'
 import NavBar from '../components/NavBar'
 
-// ─── Dummy data ───────────────────────────────────────────────
+// ─── Fallback dummy data ──────────────────────────────────────────────────────
 
-const radarData = [
-  { intent: '신뢰/권위',  우리병원: 72, 경쟁사평균: 55 },
-  { intent: '정보/스펙',  우리병원: 28, 경쟁사평균: 68 },
-  { intent: '경험/감성',  우리병원: 61, 경쟁사평균: 57 },
-  { intent: '가격/비교',  우리병원: 15, 경쟁사평균: 74 },
-  { intent: '추천형',     우리병원: 67, 경쟁사평균: 52 },
-  { intent: '전문가형',   우리병원: 80, 경쟁사평균: 45 },
+const DUMMY_RADAR = [
+  { intent: '스마일라식',      우리브랜드: 72, 경쟁사평균: 55 },
+  { intent: '라섹',            우리브랜드: 28, 경쟁사평균: 68 },
+  { intent: '백내장 수술',     우리브랜드: 61, 경쟁사평균: 57 },
+  { intent: '노안 교정술',     우리브랜드: 15, 경쟁사평균: 74 },
+  { intent: '안구건조증 치료', 우리브랜드: 67, 경쟁사평균: 52 },
 ]
 
-const pieData = [
-  { name: '강남 밝은눈 안과', value: 24 },
-  { name: '라식 아이센터',    value: 31 },
-  { name: '강남 연세안과',    value: 22 },
-  { name: '기타 경쟁사',      value: 23 },
-]
-const PIE_COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#334155']
-
-const clusterTrust   = [{x:3.2,y:4.1,z:20},{x:3.8,y:3.7,z:18},{x:3.5,y:4.5,z:22},{x:4.0,y:4.2,z:16},{x:3.1,y:3.9,z:14}]
-const clusterInfo    = [{x:-2.1,y:1.5,z:19},{x:-2.6,y:2.1,z:21},{x:-1.8,y:1.2,z:17},{x:-2.4,y:0.8,z:15},{x:-3.0,y:1.7,z:23}]
-const clusterEmotion = [{x:0.5,y:-2.8,z:18},{x:1.2,y:-3.2,z:20},{x:-0.3,y:-2.5,z:16},{x:0.8,y:-3.8,z:22},{x:1.5,y:-2.2,z:14}]
-const clusterPrice   = [{x:-3.5,y:-1.2,z:24},{x:-4.0,y:-0.8,z:19},{x:-3.2,y:-1.8,z:21},{x:-4.2,y:-1.5,z:17},{x:-3.8,y:-2.0,z:15}]
-const ourBrand       = [{x:2.1,y:0.4,z:50}]
-
-const insights = [
-  {
-    level: 'critical', Icon: AlertTriangle,
-    title: '가격/비교 의도에서 심각한 소외',
-    desc: '"스마일라식 가격 비교" 유형 질문에서 노출률 15% — 1위 경쟁사 대비 −59%p',
-    action: '처방 적용 시 +38% 상승 예측',
-  },
-  {
-    level: 'warning', Icon: AlertCircle,
-    title: '정보/스펙 영역 취약',
-    desc: '"최신 장비", "수술 방식 비교" 질문군에서 잠재 공간 거리 4.2 — 전 의도 중 최원거리',
-    action: '기술 정보성 콘텐츠 보강 권장',
-  },
-  {
-    level: 'success', Icon: Award,
-    title: '신뢰/권위 의도에서 TOP 1 유지',
-    desc: '"의사 경력", "사후관리" 관련 질문에서 72% 노출률 — 업계 1위 유지 중',
-    action: '현재 전략 유지 권장',
-  },
-  {
-    level: 'info', Icon: Lightbulb,
-    title: '경험/감성 영역 성장 기회',
-    desc: '"내돈내산 후기" 질문군 노출률 61% — 소폭 개선 여지 존재',
-    action: '처방 적용 시 +22% 상승 예측',
-  },
+const DUMMY_PIE = [
+  { name: '추천형', value: 27 },
+  { name: '비교형', value: 31 },
+  { name: '후기형', value: 22 },
+  { name: '전문가형', value: 20 },
 ]
 
-// ─── Sub-components ───────────────────────────────────────────
+const DUMMY_FEATURES = [
+  { feature: '스마일라식 | 추천형', score: 0.38 },
+  { feature: '백내장 수술 | 후기형', score: 0.29 },
+  { feature: '라섹 | 비교형', score: 0.22 },
+  { feature: '노안 교정술 | 전문가형', score: 0.18 },
+  { feature: '스마일라식 | 비교형', score: 0.15 },
+]
+
+const DUMMY_KPI = {
+  brand_exposure_rate: 24,
+  top_competitor_rate: 85,
+  top_competitor_name: '강남스마일안과',
+  total_questions: 970,
+}
+
+const PIE_COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b']
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function Card({ children, className = '' }) {
   return (
-    <div className={`bg-slate-800/50 border border-slate-700/50 rounded-xl p-5 ${className}`}>
+    <div className={`bg-slate-800/40 border border-slate-700/40 rounded-2xl p-5 backdrop-blur-sm ${className}`}>
       {children}
     </div>
   )
 }
 
-function CardTitle({ icon: Icon, children }) {
+function CardTitle({ icon: Icon, children, color = 'text-blue-400' }) {
   return (
     <div className="flex items-center gap-2 mb-4">
-      {Icon && <Icon size={15} className="text-blue-400" />}
+      {Icon && <Icon size={15} className={color} />}
       <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{children}</h3>
-    </div>
-  )
-}
-
-function InsightCard({ level, Icon, title, desc, action }) {
-  const s = {
-    critical: { wrap: 'bg-red-500/10 border-red-500/30',        icon: 'text-red-400',     badge: 'bg-red-500/20 text-red-300' },
-    warning:  { wrap: 'bg-amber-500/10 border-amber-500/30',    icon: 'text-amber-400',   badge: 'bg-amber-500/20 text-amber-300' },
-    success:  { wrap: 'bg-emerald-500/10 border-emerald-500/30',icon: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
-    info:     { wrap: 'bg-blue-500/10 border-blue-500/30',      icon: 'text-blue-400',    badge: 'bg-blue-500/20 text-blue-300' },
-  }[level]
-  return (
-    <div className={`border rounded-xl p-4 ${s.wrap}`}>
-      <div className="flex items-start gap-3">
-        <Icon size={16} className={`${s.icon} mt-0.5 shrink-0`} />
-        <div>
-          <p className="text-sm font-semibold text-white mb-1">{title}</p>
-          <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
-          <span className={`mt-2 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${s.badge}`}>
-            <ArrowUpRight size={10} />{action}
-          </span>
-        </div>
-      </div>
     </div>
   )
 }
@@ -107,7 +66,7 @@ function InsightCard({ level, Icon, title, desc, action }) {
 function RadarTip({ active, payload }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs space-y-1">
+    <div className="bg-slate-900 border border-slate-700/60 rounded-xl p-3 text-xs space-y-1.5 shadow-xl">
       {payload.map((p, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
@@ -120,6 +79,7 @@ function RadarTip({ active, payload }) {
 }
 
 function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }) {
+  if (percent < 0.07) return null
   const r = innerRadius + (outerRadius - innerRadius) * 0.55
   const rad = Math.PI / 180
   return (
@@ -134,142 +94,210 @@ function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }) {
   )
 }
 
-// ─── Main ─────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function Screen3({ brandName, onNext }) {
+export default function Screen3({ brandName, results, onNext }) {
+  const kpi           = results?.kpi           ?? DUMMY_KPI
+  const radarData     = results?.radar          ?? DUMMY_RADAR
+  const pieData       = results?.pie            ?? DUMMY_PIE
+  const topFeatures   = results?.top_features   ?? DUMMY_FEATURES
+  const similarBrands = results?.similar_brands ?? []
+  const isDummy       = !results
+
+  const featureChartData = topFeatures.slice(0, 8).map(f => ({
+    feature: f.feature,
+    score:   Math.round(f.score * 100),
+  }))
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
-      <NavBar brandName={brandName} currentStep={3} />
+      <NavBar
+        brandName={brandName}
+        currentStep={3}
+        onStepClick={(s) => s === 4 && onNext?.()}
+      />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 space-y-6">
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-5">
 
-        {/* KPI */}
-        <div className="grid grid-cols-4 gap-4">
-          {[
-            { label: '종합 AEO 점수',      value: '47',  unit: '/100', color: 'text-amber-400',  sub: '최고점 대비 −31점' },
-            { label: '전체 브랜드 노출률',  value: '24',  unit: '%',   color: 'text-blue-400',   sub: '150개 질문 기준' },
-            { label: '1위 경쟁사 노출률',  value: '31',  unit: '%',   color: 'text-purple-400', sub: '라식 아이센터' },
-            { label: '즉시 개선 필요 항목', value: '2',   unit: '개',  color: 'text-red-400',    sub: '처방 대기 중' },
-          ].map((k, i) => (
-            <Card key={i}>
-              <p className="text-xs text-slate-500 mb-2">{k.label}</p>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-3xl font-bold ${k.color}`}>{k.value}</span>
-                <span className="text-slate-500 text-sm">{k.unit}</span>
-              </div>
-              <p className="text-xs text-slate-600 mt-1">{k.sub}</p>
-            </Card>
-          ))}
+        {/* Brand not found warning */}
+        {results && !results.brand_found && (
+          <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-sm text-amber-300">
+            <AlertTriangle size={16} className="shrink-0" />
+            <span>
+              <strong>{brandName}</strong>이 LLM 응답에서 발견되지 않았습니다.
+              파이프라인 데이터에 해당 브랜드가 포함되어 있는지 확인하세요.
+            </span>
+          </div>
+        )}
+
+        {/* Dummy data notice */}
+        {isDummy && (
+          <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-sm text-blue-300">
+            <Info size={16} className="shrink-0" />
+            <span>백엔드가 연결되지 않아 예시 데이터를 표시합니다. run_analysis.py 실행 후 백엔드를 시작하면 실제 분석 결과가 표시됩니다.</span>
+          </div>
+        )}
+
+        {/* KPI — 2 cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -translate-y-8 translate-x-8 pointer-events-none" />
+            <p className="text-xs text-slate-500 mb-1.5 uppercase tracking-wider">전체 데이터 내 점유율</p>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-4xl font-bold text-blue-400">{kpi.brand_exposure_rate}</span>
+              <span className="text-slate-400 text-lg font-light">%</span>
+            </div>
+            <p className="text-xs text-slate-600">{kpi.total_questions || 970}개 LLM 응답 기준</p>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full -translate-y-8 translate-x-8 pointer-events-none" />
+            <p className="text-xs text-slate-500 mb-1.5 uppercase tracking-wider">최유사 경쟁사 유사도</p>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-4xl font-bold text-purple-400">{kpi.top_competitor_rate}</span>
+              <span className="text-slate-400 text-lg font-light">%</span>
+            </div>
+            <p className="text-xs text-slate-600">{kpi.top_competitor_name || '-'}</p>
+          </Card>
         </div>
 
         {/* Radar + Pie */}
-        <div className="grid grid-cols-2 gap-6">
-          <Card>
-            <CardTitle icon={Target}>의도별 LLM 노출 확률 (Radar)</CardTitle>
-            <ResponsiveContainer width="100%" height={300}>
+        <div className="grid grid-cols-5 gap-5">
+          <Card className="col-span-3">
+            <CardTitle icon={Target}>시술별 LLM 언급 비율</CardTitle>
+            <ResponsiveContainer width="100%" height={290}>
               <RadarChart data={radarData} margin={{ top: 8, right: 32, bottom: 8, left: 32 }}>
                 <PolarGrid stroke="#1e293b" strokeDasharray="4 3" />
                 <PolarAngleAxis dataKey="intent" tick={{ fill: '#94a3b8', fontSize: 11 }} />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#475569', fontSize: 9 }} tickCount={4} />
                 <Radar name="경쟁사 평균" dataKey="경쟁사평균" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.15} strokeWidth={1.5} />
-                <Radar name="우리 병원"   dataKey="우리병원"   stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.28} strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} />
+                <Radar name="우리 브랜드" dataKey="우리브랜드" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.28} strokeWidth={2} dot={{ fill: '#3b82f6', r: 3 }} />
                 <Tooltip content={<RadarTip />} />
                 <Legend wrapperStyle={{ fontSize: 11, color: '#94a3b8', paddingTop: 8 }} />
               </RadarChart>
             </ResponsiveContainer>
           </Card>
 
-          <Card>
-            <CardTitle icon={BarChart2}>Share of Voice — LLM 응답 내 브랜드 점유율</CardTitle>
-            <ResponsiveContainer width="100%" height={250}>
+          <Card className="col-span-2">
+            <CardTitle icon={BarChart2}>질문 유형별 언급 비율</CardTitle>
+            <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
                   data={pieData} cx="50%" cy="50%"
-                  outerRadius={100} innerRadius={48}
+                  outerRadius={90} innerRadius={44}
                   dataKey="value" labelLine={false} label={<PieLabel />}
                 >
-                  {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} stroke="transparent" />)}
+                  {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} stroke="transparent" />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 12 }}
+                  formatter={(v, name) => [`${v}%`, name]}
+                />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#94a3b8' }} />
               </PieChart>
             </ResponsiveContainer>
-            <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-900/40 rounded-lg p-2 mt-1">
-              <Info size={11} className="text-blue-400 shrink-0" />
-              동일 키워드 LLM 10회 반복 응답 기준
+            <div className="flex items-start gap-2 text-xs text-slate-500 bg-slate-900/40 rounded-lg p-2.5 mt-1">
+              <Info size={11} className="text-blue-400 shrink-0 mt-0.5" />
+              TF-IDF 기반 · 해당 브랜드의 언급 유형 분포
             </div>
           </Card>
         </div>
 
-        {/* Scatter */}
+        {/* 핵심 강점 */}
         <Card>
-          <CardTitle icon={Brain}>AI 잠재 공간 지도 — Semantic Latent Map</CardTitle>
-          <p className="text-xs text-slate-500 mb-4">
-            질문 의도 군집과 우리 브랜드의 임베딩 공간 상 위치. 거리가 멀수록 해당 의도에서 소외됨.
-          </p>
-          <div className="flex gap-6 items-start">
-            <ResponsiveContainer width="100%" height={320}>
-              <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis type="number" dataKey="x" domain={[-5.5, 5.5]} tick={{ fill: '#475569', fontSize: 10 }} />
-                <YAxis type="number" dataKey="y" domain={[-5.5, 5.5]} tick={{ fill: '#475569', fontSize: 10 }} />
-                <ZAxis type="number" dataKey="z" range={[40, 130]} />
-                <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#475569' }} contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }} />
-                <Scatter name="신뢰/권위 질문군" data={clusterTrust}   fill="#06b6d4" fillOpacity={0.75} />
-                <Scatter name="정보/스펙 질문군" data={clusterInfo}    fill="#8b5cf6" fillOpacity={0.75} />
-                <Scatter name="경험/감성 질문군" data={clusterEmotion} fill="#f59e0b" fillOpacity={0.75} />
-                <Scatter name="가격/비교 질문군" data={clusterPrice}   fill="#ef4444" fillOpacity={0.75} />
-                <Scatter name="★ 우리 병원"      data={ourBrand}       fill="#3b82f6" shape="star" />
-                <Legend wrapperStyle={{ fontSize: 11, color: '#94a3b8' }} />
-              </ScatterChart>
-            </ResponsiveContainer>
-
-            <div className="w-48 shrink-0 space-y-2">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">군집별 의미 거리</p>
-              {[
-                { color: '#06b6d4', label: '신뢰/권위', dist: 1.2, ok: true,  status: '근접'     },
-                { color: '#8b5cf6', label: '정보/스펙', dist: 4.2, ok: false, status: '원거리'   },
-                { color: '#f59e0b', label: '경험/감성', dist: 2.8, ok: true,  status: '보통'     },
-                { color: '#ef4444', label: '가격/비교', dist: 5.1, ok: false, status: '최원거리' },
-              ].map((item, i) => (
-                <div key={i} className="bg-slate-900/50 rounded-lg p-2.5 text-xs">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full" style={{ background: item.color }} />
-                      <span className="text-slate-300">{item.label}</span>
-                    </div>
-                    <span className={item.ok ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold'}>{item.status}</span>
-                  </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5">
-                    <div className="h-1.5 rounded-full" style={{ background: item.color, width: `${(item.dist / 6) * 100}%`, opacity: 0.8 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CardTitle icon={Sparkles} color="text-amber-400">
+            브랜드 핵심 강점 — TF-IDF 임베딩 가중치 (시술 × 질문 유형)
+          </CardTitle>
+          {featureChartData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={featureChartData.length * 36 + 16}>
+                <BarChart
+                  data={featureChartData}
+                  layout="vertical"
+                  margin={{ top: 0, right: 56, left: 0, bottom: 0 }}
+                >
+                  <XAxis type="number" tick={{ fill: '#475569', fontSize: 10 }} tickLine={false} axisLine={false} />
+                  <YAxis
+                    type="category" dataKey="feature"
+                    tick={{ fill: '#94a3b8', fontSize: 11 }} width={175}
+                    tickLine={false} axisLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 11 }}
+                    formatter={(v) => [`${v}`, 'TF-IDF 강점 점수 (×100)']}
+                  />
+                  <Bar dataKey="score" radius={[0, 4, 4, 0]} barSize={16}>
+                    {featureChartData.map((_, i) => (
+                      <Cell
+                        key={i}
+                        fill={`hsl(${38 + i * 4}, ${90 - i * 4}%, ${60 - i * 3}%)`}
+                        fillOpacity={1 - i * 0.08}
+                      />
+                    ))}
+                    <LabelList dataKey="score" position="right" style={{ fill: '#94a3b8', fontSize: 10 }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <p className="text-xs text-slate-600 mt-2">
+                LLM 응답에서 해당 브랜드가 어떤 시술×유형 조합에서 두드러지게 언급되는지 나타냅니다.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-slate-600 text-center py-6">브랜드 데이터가 없습니다.</p>
+          )}
         </Card>
 
-        {/* Insight cards */}
-        <div>
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Zap size={13} className="text-yellow-400" />
-            인사이트 스코어카드
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            {insights.map((ins, i) => <InsightCard key={i} {...ins} />)}
-          </div>
-        </div>
+        {/* 유사 경쟁사 */}
+        {similarBrands.length > 0 && (
+          <Card>
+            <CardTitle icon={BarChart2}>포지셔닝 유사 경쟁사 Top 5 — TF-IDF 코사인 유사도</CardTitle>
+            <div className="space-y-2.5">
+              {similarBrands.map((b, i) => {
+                const pct = Math.round(b.similarity * 100)
+                return (
+                  <div key={i} className="flex items-center gap-3 group">
+                    <span className="text-xs text-slate-600 w-4 font-mono">{i + 1}</span>
+                    <span className="text-sm text-slate-200 flex-1 group-hover:text-white transition-colors">{b.name}</span>
+                    <div className="w-36 bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-1.5 rounded-full bg-gradient-to-r from-purple-600 to-purple-400 transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-slate-400 w-10 text-right font-mono">{pct}%</span>
+                  </div>
+                )
+              })}
+            </div>
+            <p className="text-xs text-slate-600 mt-3 leading-relaxed">
+              시술×유형 벡터 공간에서 가장 가까운 브랜드 — 포지셔닝 전략이 유사할수록 직접 경쟁 관계
+            </p>
+          </Card>
+        )}
 
-        {/* CTA */}
-        <div className="flex justify-end pt-4 pb-8">
-          <button
-            onClick={onNext}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white font-semibold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 text-sm"
-          >
-            AI 처방 솔루션 확인하기
-            <ArrowUpRight size={16} />
-          </button>
-        </div>
+        {/* URL 분석 진입 카드 */}
+        <button
+          onClick={onNext}
+          className="w-full group relative overflow-hidden bg-gradient-to-br from-purple-900/30 to-slate-800/40 border border-purple-500/30 hover:border-purple-400/60 rounded-2xl p-6 text-left transition-all duration-200 hover:bg-purple-900/40"
+        >
+          <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 rounded-full -translate-y-12 translate-x-12 pointer-events-none group-hover:bg-purple-500/10 transition-colors" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                <Globe size={18} className="text-purple-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">출처 URL 임베딩 분석</p>
+                <p className="text-xs text-slate-400 mt-0.5">12,447건의 LLM 인용 URL을 멀티모달 3D 시각화로 탐색</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-purple-400 group-hover:text-purple-300 transition-colors">
+              <span className="text-xs font-medium">URL 분석 보기</span>
+              <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+        </button>
+
       </div>
     </div>
   )

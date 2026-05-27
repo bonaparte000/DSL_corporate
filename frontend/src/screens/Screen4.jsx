@@ -1,247 +1,351 @@
-import { useState } from 'react'
-import { Copy, Check, ChevronRight, FileText, ArrowLeft } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import {
+  BarChart, Bar, XAxis, YAxis, Cell, LabelList, Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
+import { ExternalLink, Globe, Layers, Search, Zap, Info, ArrowUpRight } from 'lucide-react'
 import NavBar from '../components/NavBar'
 
-const prescriptions = [
-  {
-    priority: 1, intent: '가격/비교', urgency: 'critical',
-    title: '스마일라식 가격 비교 정보성 콘텐츠 발행',
-    detail: '타원장 대비 가격 구조와 포함 서비스를 명시한 "비교표" 포함 블로그를 발행하세요. LLM은 구조화된 정보(표, 목록)를 포함한 콘텐츠를 우선 인용합니다.',
-    expectedGain: '+38%',
-    draft: `# 스마일라식 비용 총정리: 강남 주요 안과 가격 비교 가이드 (2025)
-
-## 들어가며
-
-스마일라식을 고려하시는 분들이 가장 먼저 궁금해하시는 것은 **"정확한 비용"** 입니다. 하지만 인터넷에는 광범위한 가격 범위만 나올 뿐, 실제 무엇이 포함되어 있는지는 불명확한 경우가 많습니다.
-
-이 글에서는 **강남 밝은눈 안과의 가격 구조**를 투명하게 공개하고, 합리적인 선택 기준을 제시합니다.
-
----
-
-## 강남 주요 안과 스마일라식 비용 비교
-
-| 항목 | 강남 밝은눈 안과 | 업계 평균 |
-|------|---------|----------|
-| 스마일라식 (양안) | 290만원 | 310~380만원 |
-| 정밀 검사비 | **포함** | 별도 5~10만원 |
-| 3년 무상 재교정 | **포함** | 별도 계약 |
-| 야간 빛번짐 케어 | **포함** | 옵션 추가 |
-| 담당 의사 지정 | **포함** | 불가 |
-
-> 💡 비용만 보면 안 됩니다. 정밀검사, 사후관리, 재교정 보장 여부를 합산했을 때의
-> 실질 비용을 비교하세요.
-
----
-
-*본 콘텐츠는 AEO 플랫폼 AI가 '가격/비교' 의도 최적화를 위해 자동 생성한 초안입니다.*`,
-  },
-  {
-    priority: 2, intent: '정보/스펙', urgency: 'warning',
-    title: '최신 장비 및 수술 방식 전문 페이지 구축',
-    detail: '"VISX iDESIGN", "Contoura Vision" 등 장비명을 명시하고 각 수술 방식의 적합 대상을 표 형태로 정리한 전문 정보 페이지가 필요합니다.',
-    expectedGain: '+29%',
-    draft: `# 스마일라식 vs 라섹: 내 눈에 맞는 수술 방식 완전 비교 (2025)
-
-## 수술 방식 한눈에 비교
-
-| 항목 | 스마일라식 | 라섹 |
-|------|---------|------|
-| 각막 절개 방식 | 레이저 소절개 (2mm) | 상피 제거 후 레이저 |
-| 회복 기간 | 1~2일 | 3~5일 |
-| 건조증 위험 | 낮음 | 중간 |
-| 고도근시 적합성 | ✅ 적합 | △ 조건부 |
-| 사용 장비 | VISX iDESIGN | MEL90 Excimer |
-
-## 강남 밝은눈 안과 보유 장비
-
-- **VISX iDESIGN**: 눈의 고차수차까지 정밀 측정, 맞춤형 절삭 가능
-- **Contoura Vision**: 각막 지형 기반 개인화 교정
-
----
-
-*본 콘텐츠는 AEO 플랫폼 AI가 '정보/스펙' 의도 최적화를 위해 자동 생성한 초안입니다.*`,
-  },
-  {
-    priority: 3, intent: '경험/감성', urgency: 'info',
-    title: '실명 기반 장기 경과 후기 콘텐츠 강화',
-    detail: '수술 후 3개월·6개월·1년 경과 후기를 타임라인 형태로 구성하세요. LLM은 시간적 깊이가 있는 후기를 신뢰도 높은 출처로 판단합니다.',
-    expectedGain: '+22%',
-    draft: `# 강남 밝은눈 안과 스마일라식 1년 후기 (직장인 김OO, 34세)
-
-## 수술 전 고민
-
-시력이 -5.5였고, 콘택트렌즈를 10년 넘게 착용해 각막 건강이 걱정됐습니다.
-여러 병원을 비교하다 **15년 경력 전문의 직접 집도**와 **3년 무상 재교정** 조건에 이끌려 방문했습니다.
-
-## 수술 당일 (D-day)
-
-- 오전 10시 입실 → 11시 수술 완료 (15분 소요)
-- 수술 중 통증 없음, 약간의 압박감만 느꼈습니다
-- 귀가 후 4시간 수면 권고
-
-## 경과 기록
-
-| 시점 | 시력 | 특이사항 |
-|------|------|---------|
-| 수술 다음날 | 0.9 / 1.0 | 약간의 빛번짐 |
-| 1개월 후 | 1.2 / 1.2 | 빛번짐 소멸 |
-| 6개월 후 | 1.5 / 1.5 | 완전 안정 |
-| 1년 후 | 1.5 / 1.5 | 건조증 전혀 없음 |
-
----
-
-*본 콘텐츠는 AEO 플랫폼 AI가 '경험/감성' 의도 최적화를 위해 자동 생성한 초안입니다.*`,
-  },
-]
-
-const urgencyBadge = {
-  critical: 'bg-red-500/20 text-red-300 border-red-500/30',
-  warning:  'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  info:     'bg-blue-500/20 text-blue-300 border-blue-500/30',
+const CAT_COLORS = {
+  'Hospital/Clinic': '#818cf8',
+  'Other Web':       '#94a3b8',
+  'YouTube':         '#f87171',
+  'Tistory Blog':    '#fb923c',
+  'News Media':      '#a78bfa',
+  'Public/Gov':      '#67e8f9',
+  'DC Inside':       '#60a5fa',
+  'Google API':      '#fbbf24',
 }
 
-export default function Screen4({ brandName, onBack }) {
-  const [activePresc, setActivePresc] = useState(0)
-  const [editorContent, setEditorContent] = useState(prescriptions[0].draft)
-  const [copied, setCopied] = useState(false)
+const QT_COLORS = {
+  '비교형':   '#3b82f6',
+  '후기형':   '#8b5cf6',
+  '전문가형': '#06b6d4',
+  '추천형':   '#f59e0b',
+}
 
-  function selectPresc(i) {
-    setActivePresc(i)
-    setEditorContent(prescriptions[i].draft)
-    setCopied(false)
-  }
+function Card({ children, className = '' }) {
+  return (
+    <div className={`bg-slate-800/40 border border-slate-700/40 rounded-2xl p-5 backdrop-blur-sm ${className}`}>
+      {children}
+    </div>
+  )
+}
 
-  function handleCopy() {
-    navigator.clipboard.writeText(editorContent)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+function CardTitle({ icon: Icon, children, color = 'text-purple-400' }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      {Icon && <Icon size={15} className={color} />}
+      <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{children}</h3>
+    </div>
+  )
+}
+
+function StatCard({ value, label, sub, color = 'text-purple-400', icon: Icon }) {
+  return (
+    <Card className="relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -translate-y-6 translate-x-6 pointer-events-none" />
+      <div className="flex items-start justify-between mb-2">
+        <p className="text-xs text-slate-500 uppercase tracking-wider">{label}</p>
+        {Icon && <Icon size={14} className="text-slate-600" />}
+      </div>
+      <p className={`text-3xl font-bold ${color}`}>{value}</p>
+      {sub && <p className="text-xs text-slate-600 mt-1">{sub}</p>}
+    </Card>
+  )
+}
+
+function BarTip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-slate-900 border border-slate-700/60 rounded-xl p-3 text-xs shadow-xl">
+      <p className="text-slate-400 mb-1">{label}</p>
+      <p className="text-white font-bold">{payload[0].value.toLocaleString()}건</p>
+    </div>
+  )
+}
+
+export default function Screen4({ brandName, onNavigate }) {
+  const [urlData, setUrlData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [mapExpanded, setMapExpanded] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/url-analysis')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setUrlData(d); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  const catData = urlData?.category_distribution.slice(0, 6) ?? []
+  const qtData  = urlData
+    ? [...urlData.query_type_stats].sort((a, b) => b.citations - a.citations)
+    : []
+  const topQuery  = qtData[0]?.query_type ?? '-'
+  const catCount  = urlData?.category_distribution.length ?? 0
+  const maxDScore = qtData.length ? Math.max(...qtData.map(d => d.diversity_score)) : 1
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white">
-      <NavBar brandName={brandName} currentStep={4} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950 text-white">
+      <NavBar brandName={brandName} currentStep={4} onStepClick={onNavigate} />
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-6 py-10 space-y-5">
 
-        <div className="grid grid-cols-5 gap-6">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-xl font-bold text-white">출처 URL 임베딩 분석</h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Vertex AI LLM 인용 URL을 멀티모달 임베딩(텍스트 70% + 이미지 30%) → UMAP 3D로 맵핑
+            </p>
+          </div>
+          <a
+            href="/static/multimodal_latent_space.html"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-xs text-purple-400 hover:text-purple-300 border border-purple-500/30 hover:border-purple-400/50 bg-purple-500/10 hover:bg-purple-500/15 px-4 py-2 rounded-xl transition-all"
+          >
+            <ArrowUpRight size={13} />
+            3D 확률공간 새 탭으로 열기
+          </a>
+        </div>
 
-          {/* Left: 처방전 */}
-          <div className="col-span-2 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <FileText size={13} />
-              AI 처방전 ({prescriptions.length}개 액션 아이템)
-            </h3>
+        {loading && (
+          <Card className="text-center py-12">
+            <p className="text-slate-500 text-sm animate-pulse">URL 분석 데이터 로딩 중...</p>
+          </Card>
+        )}
 
-            {prescriptions.map((p, i) => (
-              <button
-                key={i}
-                onClick={() => selectPresc(i)}
-                className={`w-full text-left rounded-xl p-4 border transition-all duration-150 ${
-                  activePresc === i
-                    ? 'bg-blue-600/20 border-blue-500/50 shadow-lg shadow-blue-900/30'
-                    : 'bg-slate-800/30 border-slate-700/40 hover:border-slate-600/60 hover:bg-slate-800/50'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                    activePresc === i ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-400'
-                  }`}>
-                    {p.priority}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className={`text-xs px-1.5 py-0.5 rounded border ${urgencyBadge[p.urgency]}`}>{p.intent}</span>
-                      <span className="text-xs text-emerald-400 font-semibold">{p.expectedGain} 예측</span>
-                    </div>
-                    <p className="text-sm font-semibold text-white leading-snug">{p.title}</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">{p.detail}</p>
-                  </div>
-                  <ChevronRight size={13} className={`shrink-0 mt-1 ${activePresc === i ? 'text-blue-400' : 'text-slate-600'}`} />
-                </div>
-              </button>
-            ))}
+        {!loading && !urlData && (
+          <Card className="flex items-center gap-3 text-amber-300 text-sm">
+            <Info size={16} className="shrink-0" />
+            <span>URL 분석 데이터를 불러올 수 없습니다. 백엔드가 실행 중인지 확인하세요.</span>
+          </Card>
+        )}
 
-            {/* Score prediction */}
-            <div className="bg-slate-900/60 border border-slate-700/40 rounded-xl p-4 mt-2">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">처방 전체 적용 시 예측 점수</p>
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-500">현재</span>
-                    <span className="text-amber-400 font-semibold">47점</span>
-                  </div>
-                  <div className="w-full bg-slate-800 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-amber-500 to-amber-400 h-2 rounded-full" style={{ width: '47%' }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-500">예측</span>
-                    <span className="text-emerald-400 font-semibold">78점</span>
-                  </div>
-                  <div className="w-full bg-slate-800 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-blue-500 to-emerald-400 h-2 rounded-full" style={{ width: '78%' }} />
-                  </div>
-                </div>
-              </div>
+        {urlData && (
+          <>
+            {/* Stat cards */}
+            <div className="grid grid-cols-4 gap-4">
+              <StatCard
+                icon={Globe}
+                label="총 인용 URL"
+                value={urlData.total_citations.toLocaleString()}
+                sub="Vertex AI 응답 내 출처 합계"
+                color="text-purple-400"
+              />
+              <StatCard
+                icon={Layers}
+                label="인용 카테고리"
+                value={`${catCount}가지`}
+                sub="병원·유튜브·블로그 등"
+                color="text-blue-400"
+              />
+              <StatCard
+                icon={Search}
+                label="최다 인용 쿼리 유형"
+                value={topQuery}
+                sub={`${qtData[0]?.citations.toLocaleString() ?? 0}건`}
+                color="text-cyan-400"
+              />
+              <StatCard
+                icon={Zap}
+                label="최고 다양성 점수"
+                value={maxDScore.toFixed(2)}
+                sub="후기형 쿼리 공간 분산도"
+                color="text-emerald-400"
+              />
             </div>
 
-            {/* Back button */}
-            <button
-              onClick={onBack}
-              className="w-full flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white border border-slate-700/50 hover:border-slate-600 rounded-xl py-3 transition-all mt-2"
-            >
-              <ArrowLeft size={14} />
-              대시보드로 돌아가기
-            </button>
-          </div>
+            {/* Category chart + Query type diversity */}
+            <div className="grid grid-cols-5 gap-5">
+              <Card className="col-span-3">
+                <CardTitle icon={Globe}>LLM 정보 출처 선호도 — 카테고리별 인용 횟수</CardTitle>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart
+                    data={catData}
+                    layout="vertical"
+                    margin={{ top: 0, right: 70, left: 0, bottom: 0 }}
+                  >
+                    <XAxis type="number" tick={{ fill: '#475569', fontSize: 10 }} tickLine={false} axisLine={false} />
+                    <YAxis
+                      type="category" dataKey="label"
+                      tick={{ fill: '#94a3b8', fontSize: 10 }} width={130}
+                      tickLine={false} axisLine={false}
+                    />
+                    <Tooltip content={<BarTip />} />
+                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={18}>
+                      {catData.map((d) => (
+                        <Cell key={d.category} fill={CAT_COLORS[d.category] ?? '#64748b'} fillOpacity={0.85} />
+                      ))}
+                      <LabelList
+                        dataKey="pct"
+                        position="right"
+                        formatter={(v) => `${v}%`}
+                        style={{ fill: '#64748b', fontSize: 10 }}
+                      />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <p className="text-xs text-slate-600 mt-2">
+                  병원·의원 공식 사이트가 절반 이상 — LLM이 1차 출처로 병원 자체 사이트를 선호합니다
+                </p>
+              </Card>
 
-          {/* Right: Editor */}
-          <div className="col-span-3 flex flex-col">
-            <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden flex flex-col flex-1">
-              {/* Editor header */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/50 bg-slate-900/50">
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500/50" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
-                  </div>
-                  <span className="text-xs text-slate-500 font-mono">
-                    ai-draft-{prescriptions[activePresc].intent.replace('/', '-')}.md
-                  </span>
+              <Card className="col-span-2">
+                <CardTitle icon={Zap} color="text-cyan-400">쿼리 유형별 다양성 점수</CardTitle>
+                <div className="space-y-3.5 mt-1">
+                  {qtData.map((d) => {
+                    const color = QT_COLORS[d.query_type] ?? '#64748b'
+                    const pct   = (d.diversity_score / maxDScore) * 100
+                    return (
+                      <div key={d.query_type} className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span
+                            className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                            style={{ background: color + '22', color }}
+                          >
+                            {d.query_type}
+                          </span>
+                          <div className="text-right">
+                            <span className="text-xs text-slate-300 font-mono">{d.diversity_score.toFixed(2)}</span>
+                            <span className="text-xs text-slate-600 ml-1">· {d.citations.toLocaleString()}건</span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-800/80 rounded-full h-1.5">
+                          <div
+                            className="h-1.5 rounded-full"
+                            style={{ width: `${pct}%`, background: color }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-xs text-slate-600 mt-4 leading-relaxed">
+                  값이 높을수록 다양한 클러스터에 걸쳐 분산<br />
+                  낮을수록 동질 문서 집중 인용
+                </p>
+              </Card>
+            </div>
+
+            {/* Master sources */}
+            <Card>
+              <CardTitle icon={ExternalLink}>쿼리 유형별 마스터 소스 — 3D 중심점 최근접 문서</CardTitle>
+              <div className="overflow-hidden rounded-xl border border-slate-700/40">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-slate-900/60 border-b border-slate-700/40">
+                      <th className="text-left px-4 py-2.5 text-slate-500 font-medium w-24">유형</th>
+                      <th className="text-left px-4 py-2.5 text-slate-500 font-medium w-36">카테고리</th>
+                      <th className="text-left px-4 py-2.5 text-slate-500 font-medium">대표 도메인</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {urlData.master_sources.map((m, i) => (
+                      <tr key={i} className="border-b border-slate-700/30 last:border-0 hover:bg-slate-800/40 transition-colors">
+                        <td className="px-4 py-3">
+                          <span
+                            className="font-semibold px-2 py-0.5 rounded-md text-xs"
+                            style={{
+                              background: (QT_COLORS[m.query_type] ?? '#64748b') + '22',
+                              color: QT_COLORS[m.query_type] ?? '#94a3b8',
+                            }}
+                          >
+                            {m.query_type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-slate-400">{m.category}</td>
+                        <td className="px-4 py-3">
+                          <a
+                            href={m.url} target="_blank" rel="noreferrer"
+                            className="text-blue-400 hover:text-blue-300 flex items-center gap-1.5 transition-colors group"
+                          >
+                            <span>{m.domain}</span>
+                            <ExternalLink size={10} className="shrink-0 opacity-60 group-hover:opacity-100" />
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-600 mt-3 leading-relaxed">
+                3D 임베딩 공간에서 각 쿼리 유형 클러스터의 무게중심에 가장 가까운 URL — 해당 유형을 대표하는 핵심 출처
+              </p>
+            </Card>
+
+            {/* 3D Map */}
+            <Card>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Globe size={15} className="text-purple-400" />
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">멀티모달 3D 시맨틱 맵 — URL 임베딩 확률 공간</h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/20">AI 초안</span>
                   <button
-                    onClick={handleCopy}
-                    className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all ${
-                      copied
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                        : 'bg-slate-700/50 text-slate-300 border-slate-600/50 hover:bg-slate-600/50'
-                    }`}
+                    onClick={() => setMapExpanded(v => !v)}
+                    className="text-xs text-slate-400 hover:text-slate-300 border border-slate-700/50 hover:border-slate-600 px-3 py-1 rounded-lg transition-colors"
                   >
-                    {copied ? <Check size={12} /> : <Copy size={12} />}
-                    {copied ? '복사됨!' : '원클릭 복사'}
+                    {mapExpanded ? '접기' : '인라인 열기'}
                   </button>
+                  <a
+                    href="/static/multimodal_latent_space.html"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 border border-purple-500/30 hover:border-purple-400/50 px-3 py-1 rounded-lg transition-colors"
+                  >
+                    <ArrowUpRight size={11} />
+                    새 탭
+                  </a>
                 </div>
               </div>
 
-              {/* Textarea */}
-              <textarea
-                value={editorContent}
-                onChange={e => setEditorContent(e.target.value)}
-                className="flex-1 bg-transparent text-slate-300 text-sm font-mono p-5 resize-none outline-none leading-relaxed min-h-96"
-                spellCheck={false}
-              />
+              {mapExpanded ? (
+                <iframe
+                  src="/static/multimodal_latent_space.html"
+                  className="w-full rounded-xl border border-purple-500/20"
+                  style={{ height: 580 }}
+                  title="3D Semantic Source Map"
+                  loading="lazy"
+                />
+              ) : (
+                <div
+                  className="relative w-full rounded-xl border border-purple-500/20 bg-slate-900/60 flex flex-col items-center justify-center cursor-pointer group hover:border-purple-400/40 transition-colors"
+                  style={{ height: 200 }}
+                  onClick={() => setMapExpanded(true)}
+                >
+                  <div className="absolute inset-0 overflow-hidden rounded-xl opacity-20 pointer-events-none">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute rounded-full border border-purple-500/40"
+                        style={{
+                          width: `${(i + 1) * 70}px`,
+                          height: `${(i + 1) * 70}px`,
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <Globe size={30} className="text-purple-400/50 mb-3 group-hover:text-purple-400/80 transition-colors" />
+                  <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">클릭하여 3D 맵 로드</p>
+                  <p className="text-xs text-slate-600 mt-1">~6.5 MB · 약 12,447개 URL 포인트</p>
+                </div>
+              )}
 
-              <div className="px-5 py-2 border-t border-slate-700/30 flex items-center justify-between">
-                <span className="text-xs text-slate-600 font-mono">{editorContent.length.toLocaleString()} chars · Markdown</span>
-                <span className="text-xs text-slate-600">직접 편집 가능</span>
+              <div className="flex items-start gap-2 text-xs text-slate-500 bg-slate-900/40 rounded-lg p-3 mt-4">
+                <Info size={11} className="text-purple-400 shrink-0 mt-0.5" />
+                <span>
+                  SentenceTransformer (텍스트 의미) + ResNet50 (이미지 특징) 결합 → UMAP 3차원 압축 →
+                  HDBSCAN 클러스터링. 각 점은 하나의 URL 출처를 나타내며, 가까울수록 내용·디자인이 유사합니다.
+                </span>
               </div>
-            </div>
-          </div>
-        </div>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   )

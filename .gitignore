@@ -225,4 +225,14 @@ __marimo__/
 
 # Pipeline outputs
 cache/
-results/
+results/plots/
+results/brand_intent_matrix.csv
+results/qa_with_brands.csv
+results/scatter_data.json
+results/embedding_summary.json
+results/intent_summary.json
+# tfidf_results.json, url_analysis.json은 배포에 필요하므로 포함
+
+# Frontend build output (Railway 배포에 필요)
+!frontend/dist/
+!frontend/dist/**

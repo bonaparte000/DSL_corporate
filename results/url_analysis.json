@@ -1,0 +1,45 @@
+{
+  "total_citations": 12447,
+  "category_distribution": [
+    { "category": "Hospital/Clinic", "label": "병원·의원 공식 사이트", "count": 6462, "pct": 51.9 },
+    { "category": "Other Web",       "label": "기타 웹",              "count": 3793, "pct": 30.5 },
+    { "category": "YouTube",         "label": "YouTube (영상)",        "count": 1320, "pct": 10.6 },
+    { "category": "Tistory Blog",    "label": "티스토리 블로그",        "count": 453,  "pct": 3.6  },
+    { "category": "News Media",      "label": "뉴스 미디어",            "count": 303,  "pct": 2.4  },
+    { "category": "Public/Gov",      "label": "공공·기관 (노이즈)",     "count": 110,  "pct": 0.9  },
+    { "category": "DC Inside",       "label": "DC인사이드 (커뮤니티)",  "count": 5,    "pct": 0.04 },
+    { "category": "Google API",      "label": "Google Grounding API",  "count": 1,    "pct": 0.01 }
+  ],
+  "query_type_stats": [
+    { "query_type": "비교형",   "citations": 3901, "diversity_score": 9.364  },
+    { "query_type": "후기형",   "citations": 3197, "diversity_score": 11.567 },
+    { "query_type": "전문가형", "citations": 2829, "diversity_score": 11.027 },
+    { "query_type": "추천형",   "citations": 2520, "diversity_score": 11.171 }
+  ],
+  "master_sources": [
+    {
+      "query_type": "추천형",
+      "category": "Tistory Blog",
+      "domain": "dlrmsdn.tistory.com",
+      "url": "https://dlrmsdn.tistory.com/entry/%EA%B0%95%EB%82%A8%EA%B5%AC-%EC%8B%A0%EC%82%AC%EB%8F%99-%EB%B0%B1%EB%82%B4%EC%9E%A5-%EC%88%98%EC%88%A0-%EA%B0%80%EA%B2%A9%EB%B9%84%EA%B5%90-%EC%9E%98%ED%95%98%EB%8A%94-%EA%B3%B3-TOP-8-%EC%B6%94%EC%B2%9C"
+    },
+    {
+      "query_type": "비교형",
+      "category": "Tistory Blog",
+      "domain": "dlrmsdn.tistory.com",
+      "url": "https://dlrmsdn.tistory.com/entry/%EA%B0%95%EB%82%A8%EA%B5%AC-%EC%8B%A0%EC%82%AC%EB%8F%99-%EB%B0%B1%EB%82%B4%EC%9E%A5-%EC%88%98%EC%88%A0-%EA%B0%80%EA%B2%A9%EB%B9%84%EA%B5%90-%EC%9E%98%ED%95%98%EB%8A%94-%EA%B3%B3-TOP-8-%EC%B6%94%EC%B2%9C"
+    },
+    {
+      "query_type": "후기형",
+      "category": "Hospital/Clinic",
+      "domain": "kimeye.com",
+      "url": "https://www.kimeye.com/"
+    },
+    {
+      "query_type": "전문가형",
+      "category": "Tistory Blog",
+      "domain": "dlrmsdn.tistory.com",
+      "url": "https://dlrmsdn.tistory.com/entry/%EA%B0%95%EB%82%A8%EA%B5%AC-%EC%8B%A0%EC%82%AC%EB%8F%99-%EB%B0%B1%EB%82%B4%EC%9E%A5-%EC%88%98%EC%88%A0-%EA%B0%80%EA%B2%A9%EB%B9%84%EA%B5%90-%EC%9E%98%ED%95%98%EB%8A%94-%EA%B3%B3-TOP-8-%EC%B6%94%EC%B2%9C"
+    }
+  ]
+}
